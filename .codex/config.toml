@@ -1,9 +1,13 @@
-[project]
+project]
 name = "bet-tracker"
+model = "gpt-5.2"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+model_reasoning_effort = "high"
+model_provider = "openai"
+[history]
+# save-all (default) | none
 
 [generation]
 language = "python"
 test_framework = "pytest"
-
-[security]
-approval_policy = "on-request"
