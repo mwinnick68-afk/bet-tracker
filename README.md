@@ -19,6 +19,26 @@ python src/main.py
 Input: `data/raw/bets.csv` (falls back to `data/raw/bets.sample.csv`).
 Output: `data/reports/summary.csv`.
 
+## SQLite workflows
+
+Import CSV into SQLite:
+
+```bash
+python src/main.py import-csv --db data/bets.db --input data/raw/bets.csv
+```
+
+Write a summary CSV from SQLite:
+
+```bash
+python src/main.py summary --db data/bets.db --group sport --output data/reports/summary.csv
+```
+
+Export a ledger CSV with profit:
+
+```bash
+python src/main.py export-ledger --db data/bets.db --output data/reports/ledger.csv
+```
+
 ## Lint and tests
 
 ```bash

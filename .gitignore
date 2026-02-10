@@ -10,3 +10,6 @@ data/reports/
 
 # local-only data (keep sample tracked)
 data/raw/bets.csv
+
+# sqlite db
+data/bets.db
