@@ -5,3 +5,10 @@ __pycache__/
 data/reports/
 .env
 .DS_Store
+
+# local data
+data/raw/bets.csv
+
+# data files
+data/raw/bets.csv
+data/reports/
