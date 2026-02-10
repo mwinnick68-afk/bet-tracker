@@ -9,7 +9,7 @@ from typing import Final, Iterable, Sequence
 
 from src.db import connect, get_db_path, init_db, now_iso
 from src.io import load_bets
-from src.metrics import profit
+from src.metrics import normalize_result, profit
 
 SUMMARY_DEFAULT_OUTPUT: Final[Path] = Path("data/reports/summary.csv")
 INPUT_DEFAULT_PRIMARY: Final[Path] = Path("data/raw/bets.csv")
@@ -30,6 +30,33 @@ def parse_iso_date(value: str) -> date:
         return date.fromisoformat(value)
     except ValueError as exc:
         raise argparse.ArgumentTypeError(f"Invalid date: {value!r} (expected YYYY-MM-DD).") from exc
+
+
+def parse_american_odds(value: str) -> int:
+    try:
+        odds = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(f"Invalid odds: {value!r} (expected an integer).") from exc
+    if odds == 0:
+        raise argparse.ArgumentTypeError("Invalid odds: 0 is not allowed.")
+    return odds
+
+
+def parse_positive_stake(value: str) -> float:
+    try:
+        stake = float(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(f"Invalid stake: {value!r} (expected a number).") from exc
+    if stake <= 0:
+        raise argparse.ArgumentTypeError("Invalid stake: must be > 0.")
+    return stake
+
+
+def parse_result(value: str) -> str:
+    try:
+        return normalize_result(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(str(exc)) from exc
 
 
 def filter_bets_by_date(
@@ -257,6 +284,38 @@ def build_parser() -> argparse.ArgumentParser:
         required=True,
         help="Ledger CSV output path (all rows + profit column).",
     )
+
+    add_bet_parser = subparsers.add_parser("add-bet", help="Insert a single bet into SQLite.")
+    add_bet_parser.add_argument(
+        "--db",
+        default=str(get_db_path(None)),
+        help="SQLite DB path (default: data/bets.db).",
+    )
+    add_bet_parser.add_argument(
+        "--date", required=True, type=parse_iso_date, help="Bet date YYYY-MM-DD."
+    )
+    add_bet_parser.add_argument("--sport", required=True, help="Sport name.")
+    add_bet_parser.add_argument("--book", required=True, help="Book name.")
+    add_bet_parser.add_argument("--type", required=True, help="Bet type.")
+    add_bet_parser.add_argument(
+        "--team-or-player", required=True, help="Team or player descriptor."
+    )
+    add_bet_parser.add_argument(
+        "--odds",
+        required=True,
+        type=parse_american_odds,
+        help="American odds integer (e.g. -110, +120).",
+    )
+    add_bet_parser.add_argument(
+        "--stake", required=True, type=parse_positive_stake, help="Stake (> 0)."
+    )
+    add_bet_parser.add_argument(
+        "--result",
+        required=True,
+        type=parse_result,
+        help="Result (W, L, P, open). Case-insensitive.",
+    )
+    add_bet_parser.add_argument("--notes", default="", help="Optional notes (default empty).")
     return parser
 
 
@@ -295,6 +354,32 @@ def main(argv: Sequence[str] | None = None) -> None:
         output_path = Path(args.output)
         export_ledger(output_path, bets)
         print(f"Wrote ledger to {output_path} for {len(bets)} bets.")
+        return
+
+    if args.command == "add-bet":
+        bet = {
+            "date": args.date.isoformat(),
+            "sport": args.sport,
+            "book": args.book,
+            "type": args.type,
+            "team_or_player": args.team_or_player,
+            "odds_american": args.odds,
+            "stake": args.stake,
+            "result": args.result,
+            "notes": args.notes,
+        }
+        db_path = get_db_path(args.db)
+        with connect(db_path) as conn:
+            init_db(conn)
+            inserted, skipped = insert_bets(conn, [bet])
+        descriptor = (
+            f"{bet['date']} {bet['sport']} {bet['book']} {bet['type']} "
+            f"{bet['team_or_player']} odds={bet['odds_american']} stake={bet['stake']} result={bet['result']}"
+        )
+        if inserted == 1:
+            print(f"Inserted bet {descriptor}.")
+        else:
+            print(f"Skipped duplicate bet {descriptor}.")
         return
 
     requested_input = Path(args.input)

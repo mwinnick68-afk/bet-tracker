@@ -39,6 +39,12 @@ Export a ledger CSV with profit:
 python src/main.py export-ledger --db data/bets.db --output data/reports/ledger.csv
 ```
 
+Add a single bet to SQLite:
+
+```bash
+python src/main.py add-bet --db data/bets.db --date 2026-02-01 --sport NBA --book DK --type spread --team-or-player "Knicks -3.5" --odds -110 --stake 50 --result W --notes ""
+```
+
 ## Lint and tests
 
 ```bash

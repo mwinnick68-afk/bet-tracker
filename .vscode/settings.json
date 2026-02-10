@@ -4,13 +4,15 @@
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit"
   },
-
   "[python]": {
     "editor.defaultFormatter": "charliermarsh.ruff"
   },
-
   "ruff.enable": true,
   "ruff.format.args": [],
   "python.testing.pytestEnabled": true,
-  "python.testing.pytestArgs": ["-q"]
+  "python.testing.pytestArgs": [
+    "-q"
+  ],
+  "chatgpt.openOnStartup": true,
+  "chatgpt.commentCodeLensEnabled": true
 }
