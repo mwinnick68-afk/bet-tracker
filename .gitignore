@@ -2,13 +2,11 @@
 __pycache__/
 .pytest_cache/
 .ruff_cache/
-data/reports/
 .env
 .DS_Store
 
-# local data
-data/raw/bets.csv
-
-# data files
-data/raw/bets.csv
+# generated outputs
 data/reports/
+
+# local-only data (keep sample tracked)
+data/raw/bets.csv

@@ -1,0 +1,5 @@
+date,sport,book,type,team_or_player,odds_american,stake,result,notes
+2026-02-01,NBA,DK,spread,Knicks -3.5,-110,50,W,
+2026-02-02,NHL,FD,moneyline,Rangers,+120,25,L,
+2026-02-03,NBA,DK,total,Over 223.5,-110,50,P,
+2026-02-04,NBA,CZR,prop,Brunson points over 24.5,+105,20,open,
